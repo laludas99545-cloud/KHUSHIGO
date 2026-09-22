@@ -1,15 +1,16 @@
-      package com.luken.khushigo
+                    package com.example.khushigo
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -18,10 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,103 +31,223 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme(
                 colorScheme = lightColorScheme(
-                    primary = Color(0xFFD4AF37),
-                    secondary = Color(0xFF1E232A)
+                    primary = Color(0xFF00796B), // Vibrant Teal
+                    secondary = Color(0xFFF57C00), // Orange Accent
+                    background = Color(0xFFF8F9FA)
                 )
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = Color(0xFFF4F5F7)
+                    color = MaterialTheme.colorScheme.background
                 ) {
-                    KhushigoApp()
+                    KhushigoMainRoot()
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KhushigoApp() {
-    var selectedRole by remember { mutableStateOf("Customer") }
-    var searchText by remember { mutableStateOf("") }
+fun KhushigoMainRoot() {
+    var currentScreen by remember { mutableStateOf("splash") }
+    var selectedRole by remember { mutableStateOf("") }
+    var isAdminLoggedIn by remember { mutableStateOf(false) }
 
+    // Splash screen timer (2.5 seconds)
+    LaunchedEffect(currentScreen) {
+        if (currentScreen == "splash") {
+            delay(2500)
+            currentScreen = "role_gateway"
+        }
+    }
+
+    when (currentScreen) {
+        "splash" -> SplashScreen(onLogoTapped = {
+            // Secret Gesture for Admin: 5 taps or long press trigger
+            currentScreen = "admin_login"
+        })
+        "role_gateway" -> RoleGatewayScreen(
+            onRoleSelected = { role ->
+                selectedRole = role
+                currentScreen = "workspace"
+            },
+            onSecretAdminTrigger = {
+                currentScreen = "admin_login"
+            }
+        )
+        "admin_login" -> AdminLoginScreen(
+            onLoginSuccess = {
+                isAdminLoggedIn = true
+                currentScreen = "admin_dashboard"
+            },
+            onBack = { currentScreen = "role_gateway" }
+        )
+        "admin_dashboard" -> AdminDashboardScreen(onLogout = { currentScreen = "role_gateway" })
+        "workspace" -> WorkspaceScreen(role = selectedRole, onBack = { currentScreen = "role_gateway" })
+    }
+}
+
+@Composable
+fun SplashScreen(onLogoTapped: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF00796B))
+            .clickable { onLogoTapped() },
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(110.dp)
+                    .clip(CircleShape)
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocalShipping,
+                    contentDescription = "Logo",
+                    tint = Color(0xFFF57C00),
+                    modifier = Modifier.size(60.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = "KHUSHIGO",
+                color = Color.White,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
+            Text(
+                text = "Your Daily Super App",
+                color = Color(0xFFB2DFDB),
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(40.dp))
+            Text(
+                text = "A Product of LUKEN",
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+@Composable
+fun RoleGatewayScreen(onRoleSelected: (String) -> Unit, onSecretAdminTrigger: () -> Unit) {
+    var termsAccepted by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "KHUSHIGO",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF00796B)
+        )
+        Text(
+            text = "Powered by LUKEN",
+            fontSize = 12.sp,
+            color = Color.Gray,
+            modifier = Modifier.clickable { onSecretAdminTrigger() } // Hidden admin trigger point
+        )
+        Spacer(modifier = Modifier.height(40.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = termsAccepted,
+                    onCheckedChange = { termsAccepted = it }
+                )
+                Text(
+                    text = "I accept Partner Terms & Conditions and Safety Policies.",
+                    fontSize = 13.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        RoleButton(
+            title = "Continue as Customer",
+            enabled = termsAccepted,
+            onClick = { onRoleSelected("Customer") }
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        RoleButton(
+            title = "Login as Rider",
+            enabled = termsAccepted,
+            onClick = { onRoleSelected("Rider") }
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        RoleButton(
+            title = "Login as Merchant",
+            enabled = termsAccepted,
+            onClick = { onRoleSelected("Merchant") }
+        )
+    }
+}
+
+@Composable
+fun RoleButton(title: String, enabled: Boolean, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00796B))
+    ) {
+        Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+    }
+}
+
+@Composable
+fun WorkspaceScreen(role: String, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.`1789997871800`),
-                            contentDescription = "KHUSHIGO Logo",
-                            modifier = Modifier
-                                .size(44.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                        )
-                        Column {
-                            Text(
-                                text = "KHUSHIGO",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = Color(0xFFB8860B)
-                            )
-                            Text(
-                                text = "By LUKEN • Food & Delivery Portal",
-                                fontSize = 10.sp,
-                                color = Color.Gray
-                            )
-                        }
+                title = { Text("$role Portal - KHUSHIGO") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
-                actions = {
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = Color(0xFF1E232A))
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF00796B),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
             )
         }
-    ) { paddingValues ->
-        Column(
+    ) { padding ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
+                .padding(padding)
                 .padding(16.dp)
         ) {
-            // Role Switcher Tabs (Customer, Rider, Merchant)
-            Card(
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(2.dp),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(6.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    listOf("Customer", "Rider", "Merchant").forEach { role ->
-                        val isSelected = selectedRole == role
-                        Button(
-                            onClick = { selectedRole = role },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isSelected) Color(0xFF1E232A) else Color.Transparent,
-                                contentColor = if (isSelected) Color(0xFFD4AF37) else Color.DarkGray
-                            ),
-                            elevation = null,
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(role, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        }
-                    }
-                }
-            }
-
-            when (selectedRole) {
-                "Customer" -> CustomerPortalView(searchText) { searchText = it }
+            when (role) {
+                "Customer" -> CustomerPortalView()
                 "Rider" -> RiderPortalView()
                 "Merchant" -> MerchantPortalView()
             }
@@ -133,103 +255,66 @@ fun KhushigoApp() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomerPortalView(searchText: String, onSearchChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = searchText,
-        onValueChange = onSearchChange,
-        placeholder = { Text("Search dishes, restaurants...") },
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
-        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-        shape = RoundedCornerShape(14.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White
-        )
-    )
-
-    Card(
-        modifier = Modifier.fillMaxWidth().height(120.dp).padding(bottom = 20.dp),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E232A))
-    ) {
+fun CustomerPortalView() {
+    Column {
+        Text("Explore Categories", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(10.dp))
         Row(
-            modifier = Modifier.fillMaxSize().padding(18.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Golden Offer 🌟", color = Color(0xFFD4AF37), fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Text("50% OFF On First Order", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text("Use Code: KHUSHI50", color = Color.LightGray, fontSize = 11.sp)
+            CategoryChip("Food 🍲")
+            CategoryChip("Grocery 🛒")
+            CategoryChip("Meat & Fish 🐟")
+            CategoryChip("Bike Taxi 🏍️")
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Text("Nearby Restaurants (Base + 7% Admin Commission)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Spacer(modifier = Modifier.height(10.dp))
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Royal Spice Restaurant", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("North Indian, Chinese • 4.2★", fontSize = 12.sp, color = Color.Gray)
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = { }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF57C00))) {
+                    Text("Order Now (Flat ₹40 delivery)")
+                }
             }
-            Icon(Icons.Default.Fastfood, contentDescription = null, tint = Color(0xFFD4AF37), modifier = Modifier.size(48.dp))
         }
     }
+}
 
-    Text("Explore Categories", fontWeight = FontWeight.Bold, fontSize = 17.sp, modifier = Modifier.padding(bottom = 12.dp))
-    val categories = listOf("Pizza 🍕", "Burger 🍔", "Biryani 🍲", "Drinks 🥤", "Dessert 🍰")
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.padding(bottom = 20.dp)
+@Composable
+fun CategoryChip(title: String) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = Color.White,
+        shadowElevation = 2.dp
     ) {
-        items(categories) { item ->
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(2.dp)
-            ) {
-                Text(
-                    text = item,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 13.sp
-                )
-            }
-        }
+        Text(
+            text = title,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
-
-    Text("Popular Restaurants", fontWeight = FontWeight.Bold, fontSize = 17.sp, modifier = Modifier.padding(bottom = 12.dp))
-    RestaurantItem("Royal Biryani Palace", "4.8 ★", "20-25 mins", "Biryani, North Indian")
-    Spacer(modifier = Modifier.height(10.dp))
-    RestaurantItem("Pizza Express & Grill", "4.5 ★", "25-30 mins", "Pizzas, Italian, Fast Food")
 }
 
 @Composable
 fun RiderPortalView() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.TwoWheeler, contentDescription = null, tint = Color(0xFFB8860B), modifier = Modifier.size(32.dp))
-                Spacer(modifier = Modifier.width(10.dp))
-                Column {
-                    Text("Rider Delivery Dashboard", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text("Status: Active & Online 🟢", fontSize = 12.sp, color = Color.Gray)
-                }
-            }
-            HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp))
-            Text("Assigned Orders (1 Active)", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA)),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text("Order #KH-9842", fontWeight = FontWeight.Bold)
-                    Text("Pickup: Royal Biryani Palace", fontSize = 12.sp, color = Color.Gray)
-                    Text("Drop: MG Road, Block B", fontSize = 12.sp, color = Color.Gray)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E232A)),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Accept Delivery", color = Color(0xFFD4AF37))
-                    }
+    Column {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Rider Status: Online 🟢", fontWeight = FontWeight.Bold, color = Color(0xFF00796B))
+                Text("Wallet Balance: ₹650 (Min ₹500 required)", fontSize = 12.sp)
+                Text("Security Deposit: Paid (₹1,000)", fontSize = 12.sp, color = Color.Gray)
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(onClick = { }, modifier = Modifier.fillMaxWidth()) {
+                    Text("Toggle Duty / Scan UPI QR")
                 }
             }
         }
@@ -238,60 +323,101 @@ fun RiderPortalView() {
 
 @Composable
 fun MerchantPortalView() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Storefront, contentDescription = null, tint = Color(0xFFB8860B), modifier = Modifier.size(32.dp))
-                Spacer(modifier = Modifier.width(10.dp))
-                Column {
-                    Text("Merchant Restaurant Control", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text("Store: Open for orders 🟢", fontSize = 12.sp, color = Color.Gray)
+    Column {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Merchant Dashboard", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("Prep Time Cap: Max 20 mins (Fast Food)", fontSize = 12.sp, color = Color.Gray)
+                Text("SLA Penalty Rule: 10%/min delay deduction active", fontSize = 11.sp, color = Color.Red)
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(onClick = { }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF57C00))) {
+                    Text("Manage Menu & Accept Orders")
                 }
-            }
-            HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Total Today Orders: 14", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
-                Text("Revenue: ₹4,520", fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32), fontSize = 13.sp)
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(
-                onClick = { },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E232A)),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Manage Menu & Prices", color = Color(0xFFD4AF37))
             }
         }
     }
 }
 
 @Composable
-fun RestaurantItem(name: String, rating: String, time: String, tags: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(2.dp)
+fun AdminLoginScreen(onLoginSuccess: () -> Unit, onBack: () -> Unit) {
+    var pin by remember { mutableStateOf("") }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+        Text("Secure Admin Gateway", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color(0xFF00796B))
+        Text("Layer 1 & 2 Security Verification", fontSize = 12.sp, color = Color.Gray)
+        Spacer(modifier = Modifier.height(20.dp))
+        OutlinedTextField(
+            value = pin,
+            onValueChange = { if (it.length <= 6) pin = it },
+            label = { Text("Enter 6-Digit Admin PIN") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = { if (pin.length == 6) onLoginSuccess() },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00796B))
         ) {
-            Column {
-                Text(name, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                Text(tags, fontSize = 12.sp, color = Color.Gray)
-                Text("Fast Delivery • Free Shipping", fontSize = 11.sp, color = Color(0xFFB8860B))
-            }
-            Column(horizontalAlignment = Alignment.End) {
-                Text(rating, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32), fontSize = 13.sp)
-                Text(time, fontSize = 11.sp, color = Color.Gray)
+            Text("Unlock Dashboard")
+        }
+        TextButton(onClick = onBack) {
+            Text("Back to Gateway")
+        }
+    }
+}
+
+@Composable
+fun AdminDashboardScreen(onLogout: () -> Unit) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Admin Control Center - KHUSHIGO") },
+                actions = {
+                    IconButton(onClick = onLogout) {
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF00796B), titleContentColor = Color.White)
+            )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            item {
+                Text("System Analytics & Oversight", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(modifier = Modifier.height(10.dp))
+                AdminInfoCard("KYC Approvals", "3 Pending Driver / Merchant Documents")
+                Spacer(modifier = Modifier.height(8.dp))
+                AdminInfoCard("Merchant SLA Penalties", "Active 10%/min tracking logs")
+                Spacer(modifier = Modifier.height(8.dp))
+                AdminInfoCard("Rider Deposits & Ledgers", "₹1,000 Security pools verified")
+                Spacer(modifier = Modifier.height(8.dp))
+                AdminInfoCard("Blocked Customer Devices", "0 active bans")
             }
         }
     }
 }
-                         
+
+@Composable
+fun AdminInfoCard(title: String, subtitle: String) {
+    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Text(title, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            Text(subtitle, fontSize = 12.sp, color = Color.Gray)
+        }
+    }
+}
+                          
