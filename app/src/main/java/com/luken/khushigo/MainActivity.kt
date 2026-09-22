@@ -1,4 +1,4 @@
-                        package com.example.khushigo
+package com.example.khushigo
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -157,6 +157,7 @@ fun RoleButton(title: String, enabled: Boolean, onClick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkspaceScreen(role: String, onBack: () -> Unit) {
     Scaffold(
@@ -242,6 +243,7 @@ fun AdminLoginScreen(onLoginSuccess: () -> Unit, onBack: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminDashboardScreen(onLogout: () -> Unit) {
     Scaffold(
