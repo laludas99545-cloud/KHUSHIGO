@@ -1,14 +1,12 @@
-                    package com.example.khushigo
+                        package com.example.khushigo
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,8 +29,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme(
                 colorScheme = lightColorScheme(
-                    primary = Color(0xFF00796B), // Vibrant Teal
-                    secondary = Color(0xFFF57C00), // Orange Accent
+                    primary = Color(0xFF00796B),
+                    secondary = Color(0xFFF57C00),
                     background = Color(0xFFF8F9FA)
                 )
             ) {
@@ -53,7 +51,6 @@ fun KhushigoMainRoot() {
     var selectedRole by remember { mutableStateOf("") }
     var isAdminLoggedIn by remember { mutableStateOf(false) }
 
-    // Splash screen timer (2.5 seconds)
     LaunchedEffect(currentScreen) {
         if (currentScreen == "splash") {
             delay(2500)
@@ -62,18 +59,13 @@ fun KhushigoMainRoot() {
     }
 
     when (currentScreen) {
-        "splash" -> SplashScreen(onLogoTapped = {
-            // Secret Gesture for Admin: 5 taps or long press trigger
-            currentScreen = "admin_login"
-        })
+        "splash" -> SplashScreen(onLogoTapped = { currentScreen = "admin_login" })
         "role_gateway" -> RoleGatewayScreen(
             onRoleSelected = { role ->
                 selectedRole = role
                 currentScreen = "workspace"
             },
-            onSecretAdminTrigger = {
-                currentScreen = "admin_login"
-            }
+            onSecretAdminTrigger = { currentScreen = "admin_login" }
         )
         "admin_login" -> AdminLoginScreen(
             onLoginSuccess = {
@@ -115,24 +107,10 @@ fun SplashScreen(onLogoTapped: () -> Unit) {
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = "KHUSHIGO",
-                color = Color.White,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
-            Text(
-                text = "Your Daily Super App",
-                color = Color(0xFFB2DFDB),
-                fontSize = 14.sp
-            )
+            Text(text = "KHUSHIGO", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold)
+            Text(text = "Your Daily Super App", color = Color(0xFFB2DFDB), fontSize = 14.sp)
             Spacer(modifier = Modifier.height(40.dp))
-            Text(
-                text = "A Product of LUKEN",
-                color = Color.White.copy(alpha = 0.8f),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold
-            )
+            Text(text = "A Product of LUKEN", color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -142,67 +120,27 @@ fun RoleGatewayScreen(onRoleSelected: (String) -> Unit, onSecretAdminTrigger: ()
     var termsAccepted by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
+        modifier = Modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "KHUSHIGO",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF00796B)
-        )
-        Text(
-            text = "Powered by LUKEN",
-            fontSize = 12.sp,
-            color = Color.Gray,
-            modifier = Modifier.clickable { onSecretAdminTrigger() } // Hidden admin trigger point
-        )
+        Text(text = "KHUSHIGO", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color(0xFF00796B))
+        Text(text = "Powered by LUKEN", fontSize = 12.sp, color = Color.Gray, modifier = Modifier.clickable { onSecretAdminTrigger() })
         Spacer(modifier = Modifier.height(40.dp))
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = termsAccepted,
-                    onCheckedChange = { termsAccepted = it }
-                )
-                Text(
-                    text = "I accept Partner Terms & Conditions and Safety Policies.",
-                    fontSize = 13.sp
-                )
+        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+            Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = termsAccepted, onCheckedChange = { termsAccepted = it })
+                Text(text = "I accept Partner Terms & Conditions and Safety Policies.", fontSize = 13.sp)
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-
-        RoleButton(
-            title = "Continue as Customer",
-            enabled = termsAccepted,
-            onClick = { onRoleSelected("Customer") }
-        )
+        RoleButton(title = "Continue as Customer", enabled = termsAccepted, onClick = { onRoleSelected("Customer") })
         Spacer(modifier = Modifier.height(12.dp))
-        RoleButton(
-            title = "Login as Rider",
-            enabled = termsAccepted,
-            onClick = { onRoleSelected("Rider") }
-        )
+        RoleButton(title = "Login as Rider", enabled = termsAccepted, onClick = { onRoleSelected("Rider") })
         Spacer(modifier = Modifier.height(12.dp))
-        RoleButton(
-            title = "Login as Merchant",
-            enabled = termsAccepted,
-            onClick = { onRoleSelected("Merchant") }
-        )
+        RoleButton(title = "Login as Merchant", enabled = termsAccepted, onClick = { onRoleSelected("Merchant") })
     }
 }
 
@@ -211,9 +149,7 @@ fun RoleButton(title: String, enabled: Boolean, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         enabled = enabled,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp),
+        modifier = Modifier.fillMaxWidth().height(50.dp),
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00796B))
     ) {
@@ -228,24 +164,13 @@ fun WorkspaceScreen(role: String, onBack: () -> Unit) {
             TopAppBar(
                 title = { Text("$role Portal - KHUSHIGO") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
+                    IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF00796B),
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF00796B), titleContentColor = Color.White, navigationIconContentColor = Color.White)
             )
         }
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
             when (role) {
                 "Customer" -> CustomerPortalView()
                 "Rider" -> RiderPortalView()
@@ -260,83 +185,38 @@ fun CustomerPortalView() {
     Column {
         Text("Explore Categories", fontWeight = FontWeight.Bold, fontSize = 18.sp)
         Spacer(modifier = Modifier.height(10.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             CategoryChip("Food 🍲")
             CategoryChip("Grocery 🛒")
             CategoryChip("Meat & Fish 🐟")
             CategoryChip("Bike Taxi 🏍️")
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Text("Nearby Restaurants (Base + 7% Admin Commission)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-        Spacer(modifier = Modifier.height(10.dp))
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Royal Spice Restaurant", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text("North Indian, Chinese • 4.2★", fontSize = 12.sp, color = Color.Gray)
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(onClick = { }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF57C00))) {
-                    Text("Order Now (Flat ₹40 delivery)")
-                }
-            }
         }
     }
 }
 
 @Composable
 fun CategoryChip(title: String) {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = Color.White,
-        shadowElevation = 2.dp
-    ) {
-        Text(
-            text = title,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Medium
-        )
+    Surface(shape = RoundedCornerShape(16.dp), color = Color.White, shadowElevation = 2.dp) {
+        Text(text = title, modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), fontSize = 12.sp, fontWeight = FontWeight.Medium)
     }
 }
 
 @Composable
 fun RiderPortalView() {
-    Column {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Rider Status: Online 🟢", fontWeight = FontWeight.Bold, color = Color(0xFF00796B))
-                Text("Wallet Balance: ₹650 (Min ₹500 required)", fontSize = 12.sp)
-                Text("Security Deposit: Paid (₹1,000)", fontSize = 12.sp, color = Color.Gray)
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(onClick = { }, modifier = Modifier.fillMaxWidth()) {
-                    Text("Toggle Duty / Scan UPI QR")
-                }
-            }
+    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Rider Status: Online 🟢", fontWeight = FontWeight.Bold, color = Color(0xFF00796B))
+            Text("Wallet Balance: ₹650 (Min ₹500 required)", fontSize = 12.sp)
         }
     }
 }
 
 @Composable
 fun MerchantPortalView() {
-    Column {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Merchant Dashboard", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text("Prep Time Cap: Max 20 mins (Fast Food)", fontSize = 12.sp, color = Color.Gray)
-                Text("SLA Penalty Rule: 10%/min delay deduction active", fontSize = 11.sp, color = Color.Red)
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(onClick = { }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF57C00))) {
-                    Text("Manage Menu & Accept Orders")
-                }
-            }
+    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Merchant Dashboard", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text("Prep Time Cap: Max 20 mins (Fast Food)", fontSize = 12.sp, color = Color.Gray)
         }
     }
 }
@@ -344,15 +224,8 @@ fun MerchantPortalView() {
 @Composable
 fun AdminLoginScreen(onLoginSuccess: () -> Unit, onBack: () -> Unit) {
     var pin by remember { mutableStateOf("") }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+    Column(modifier = Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Text("Secure Admin Gateway", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color(0xFF00796B))
-        Text("Layer 1 & 2 Security Verification", fontSize = 12.sp, color = Color.Gray)
         Spacer(modifier = Modifier.height(20.dp))
         OutlinedTextField(
             value = pin,
@@ -362,16 +235,10 @@ fun AdminLoginScreen(onLoginSuccess: () -> Unit, onBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = { if (pin.length == 6) onLoginSuccess() },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00796B))
-        ) {
+        Button(onClick = { if (pin.length == 6) onLoginSuccess() }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00796B))) {
             Text("Unlock Dashboard")
         }
-        TextButton(onClick = onBack) {
-            Text("Back to Gateway")
-        }
+        TextButton(onClick = onBack) { Text("Back to Gateway") }
     }
 }
 
@@ -380,44 +247,16 @@ fun AdminDashboardScreen(onLogout: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Admin Control Center - KHUSHIGO") },
-                actions = {
-                    IconButton(onClick = onLogout) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
-                    }
-                },
+                title = { Text("Admin Control Center") },
+                actions = { IconButton(onClick = onLogout) { Icon(Icons.Default.ExitToApp, contentDescription = "Logout") } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF00796B), titleContentColor = Color.White)
             )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-        ) {
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
             item {
                 Text("System Analytics & Oversight", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Spacer(modifier = Modifier.height(10.dp))
-                AdminInfoCard("KYC Approvals", "3 Pending Driver / Merchant Documents")
-                Spacer(modifier = Modifier.height(8.dp))
-                AdminInfoCard("Merchant SLA Penalties", "Active 10%/min tracking logs")
-                Spacer(modifier = Modifier.height(8.dp))
-                AdminInfoCard("Rider Deposits & Ledgers", "₹1,000 Security pools verified")
-                Spacer(modifier = Modifier.height(8.dp))
-                AdminInfoCard("Blocked Customer Devices", "0 active bans")
             }
         }
     }
 }
-
-@Composable
-fun AdminInfoCard(title: String, subtitle: String) {
-    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Text(title, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-            Text(subtitle, fontSize = 12.sp, color = Color.Gray)
-        }
-    }
-}
-                          
